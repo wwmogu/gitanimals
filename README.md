@@ -1,3 +1,5 @@
+Learning with <a href="https://deepwiki.com/wwmogu/gitanimals"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+
 <img src="./docs/logo.svg" width="30000"/>
 
 ##
