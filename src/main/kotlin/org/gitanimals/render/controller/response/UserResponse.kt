@@ -10,19 +10,16 @@ data class UserResponse(
 ) {
 
     companion object {
-        fun from(user: User): UserResponse {
+        fun of(user: User, filterAnimation: Boolean): UserResponse {
             return UserResponse(
                 user.id.toString(),
                 user.getName(),
                 user.contributionCount().toString(),
-                user.personas.map {
-                    PersonaResponse(
-                        it.id.toString(),
-                        it.type,
-                        it.level().toString(),
-                        it.visible,
-                        it.type.getDropRate()
-                    )
+                user.personas.mapNotNull {
+                    if (filterAnimation && it.getType().haveAnimation.not()) {
+                        return@mapNotNull null
+                    }
+                    PersonaResponse.from(it)
                 }.toList()
             )
         }
@@ -34,15 +31,7 @@ data class UserResponse(
                 user.contributionCount().toString(),
                 user.personas.filter {
                     it.id in personaId
-                }.map {
-                    PersonaResponse(
-                        it.id.toString(),
-                        it.type,
-                        it.level().toString(),
-                        it.visible,
-                        it.type.getDropRate()
-                    )
-                }.toList()
+                }.map { PersonaResponse.from(it) }.toList()
             )
         }
 
@@ -53,15 +42,7 @@ data class UserResponse(
                 totalContributions = user.contributionCount().toString(),
                 personas = listOf(user.personas
                     .maxBy { it.level() }
-                    .let {
-                        PersonaResponse(
-                            it.id.toString(),
-                            it.type,
-                            it.level().toString(),
-                            it.visible,
-                            it.type.getDropRate()
-                        )
-                    }
+                    .let { PersonaResponse.from(it) }
                 )
             )
         }

@@ -6,10 +6,12 @@ import org.gitanimals.core.*
 import org.gitanimals.render.domain.event.PersonaDeleted
 import org.gitanimals.render.domain.event.UserContributionUpdated
 import org.gitanimals.render.domain.extension.RenderFieldTypeExtension.isRenderField
+import org.gitanimals.render.domain.request.VisibleChangeType
 import org.gitanimals.render.domain.response.PersonaResponse
 import org.gitanimals.render.domain.value.Contribution
 import org.gitanimals.render.domain.value.Level
 import org.hibernate.annotations.BatchSize
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -72,6 +74,13 @@ class User(
         personas.forEach { it.user = this }
     }
 
+    fun getAuthenticationId(): String = authInfo?.authenticationId
+        ?: run {
+            val message = "Cannot find any authenticationId."
+            logger.warn("$message name: \"$name\"")
+            throw IllegalArgumentException("Cannot find any authenticationId from user. name: \"$name\"")
+        }
+
     fun getName(): String = this.name
 
     fun updateName(name: String) {
@@ -89,7 +98,13 @@ class User(
     }
 
     fun addPersona(id: Long, personaType: PersonaType, level: Int): PersonaResponse {
-        val persona = Persona(id, personaType, Level(level.toLong()), personas.size < 30, this)
+        val persona = Persona(
+            id = id,
+            type = personaType,
+            level = Level(level.toLong()),
+            visible = personas.size < 30,
+            user = this,
+        )
 
         this.personas.add(persona)
 
@@ -107,6 +122,25 @@ class User(
         increasePersona.level.value += max(deletePersona.level.value / 2, 1)
 
         deletePersona(deletePersona.id)
+
+        return increasePersona
+    }
+
+    fun mergePersonaV2(increasePersonaId: Long, deletePersonaIds: List<Long>): Persona {
+        require(deletePersonaIds.contains(increasePersonaId).not()) {
+            "increasePersonaId \"$increasePersonaId\", deletePersonaId \"$deletePersonaIds\" must be different"
+        }
+
+        val increasePersona = personas.first { it.id == increasePersonaId }
+        val deletePersonas = personas.filter { it.id in deletePersonaIds }
+
+        val increaseLevel = deletePersonas.sumOf { deletePersona ->
+            max(deletePersona.level() / 2, 1)
+        }
+
+        increasePersona.level.value += increaseLevel
+
+        deletePersonas.forEach { deletePersona(it.id) }
 
         return increasePersona
     }
@@ -130,21 +164,33 @@ class User(
     }
 
     @JsonIgnore
-    fun isContributionUpdatedBeforeOneHour(): Boolean {
+    fun isContributionUpdatedLongAgo(): Boolean {
         val currentYear = instant().toZonedDateTime(ZoneId.of("UTC")).year
         val currentYearContribution =
             contributions.firstOrNull { it.year == currentYear } ?: return true
 
         return currentYearContribution.lastUpdatedContribution.isBefore(
-            Instant.now().minus(1, ChronoUnit.HOURS)
+            Instant.now().minus(10, ChronoUnit.MINUTES)
         )
     }
 
-    fun changePersonaVisible(personaId: Long, visible: Boolean): Persona {
+    fun changePersonaVisible(
+        personaId: Long,
+        visible: Boolean,
+        visibleChangeType: VisibleChangeType
+    ): Persona {
         val persona = personas.find { it.id == personaId }
             ?: throw IllegalArgumentException("Cannot find persona by id \"$personaId\"")
 
-        persona.visible = visible
+        when (visibleChangeType) {
+            VisibleChangeType.APP -> run {
+                persona.appVisible = visible
+            }
+
+            VisibleChangeType.DEFAULT -> run {
+                persona.visible = visible
+            }
+        }
 
         val visiblePersonas = personas.filter { it.visible }
 
@@ -313,6 +359,27 @@ class User(
         .append("</svg>")
         .toString()
 
+    fun evolution(personaId: Long): Persona {
+        val persona = personas.firstOrNull {
+            it.id == personaId
+        } ?: throw IllegalArgumentException("Cannot evolution persona cause cannot find matched persona by id: \"$personaId\"")
+
+        persona.evolution()
+        return persona
+    }
+
+    fun isEvolutionable(personaId: Long): Boolean {
+        val persona = personas.firstOrNull {
+            it.id == personaId
+        } ?: throw IllegalArgumentException("Cannot evolution persona cause cannot find matched persona by id: \"$personaId\"")
+
+        return persona.isEvolutionable()
+    }
+
+    fun havePersona(personaType: PersonaType): Boolean {
+        return personas.any { it.getType() == personaType }
+    }
+
     companion object {
         private const val MAX_PERSONA_COUNT = 30L
         private const val MAX_INIT_PERSONA_COUNT = 10L
@@ -320,6 +387,8 @@ class User(
         private const val FOR_INIT_PERSONA_COUNT = 100L
 
         private val nameConvention = Regex("[^a-zA-Z0-9-]")
+
+        private val logger = LoggerFactory.getLogger(this::class.simpleName)
 
         fun newUser(
             name: String,

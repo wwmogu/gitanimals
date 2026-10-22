@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.MessageListener
 import org.springframework.data.redis.core.StringRedisTemplate
 
 abstract class TraceableMessageListener(
+    private val listenerName: String,
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapper,
 ) : MessageListener {
@@ -24,6 +25,7 @@ abstract class TraceableMessageListener(
                 object : TypeReference<Map<String, String>>() {},
             )
 
+
             runCatching {
                 request["traceId"] as String
             }.onSuccess {
@@ -35,6 +37,7 @@ abstract class TraceableMessageListener(
                 MDC.put(MDCFilter.USER_ID, it)
             }
 
+            logger.info("[$listenerName] request: $request")
             onMessage(message)
         }.onFailure {
             logger.error("Fail to listen message: $message, error: $it", it)

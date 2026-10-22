@@ -1,10 +1,8 @@
-package org.gitanimals.render.infra
+package org.gitanimals.core
 
-import org.gitanimals.core.AuthorizationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.ResponseErrorHandler
-
 
 class HttpClientErrorHandler : ResponseErrorHandler {
 

@@ -53,6 +53,12 @@ val redComputerFieldSvg: String = ClassPathResource("persona/field/red-computer.
 val folderFieldSvg: String = ClassPathResource("persona/field/folder.svg")
     .getContentAsString(Charset.defaultCharset())
 
+val brickFieldSvg: String = ClassPathResource("persona/field/brick.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val brickChristmasFieldSvg: String = ClassPathResource("persona/field/brick-christmas.svg")
+    .getContentAsString(Charset.defaultCharset())
+
 val gooseSvg: String = ClassPathResource("persona/animal/goose.svg")
     .getContentAsString(Charset.defaultCharset())
 
@@ -240,6 +246,9 @@ val moleGrassSvg: String = ClassPathResource("persona/animal/mole-grass.svg")
 val rabbitSvg: String = ClassPathResource("persona/animal/rabbit.svg")
     .getContentAsString(Charset.defaultCharset())
 
+val rabbitTubeSvg: String = ClassPathResource("persona/animal/rabbit-tube.svg")
+    .getContentAsString(Charset.defaultCharset())
+
 val pigCollaboratorSvg: String = ClassPathResource("persona/animal/pig-collaborator.svg")
     .getContentAsString(Charset.defaultCharset())
 
@@ -293,6 +302,12 @@ val slimePumpkin2Svg: String = ClassPathResource("persona/animal/slime-pumpkin-2
 val hamsterSvg: String = ClassPathResource("persona/animal/hamster.svg")
     .getContentAsString(Charset.defaultCharset())
 
+val hamsterSnowSvg: String = ClassPathResource("persona/animal/hamster-snow.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val hamsterSnowSweetPotatoSvg: String = ClassPathResource("persona/animal/hamster-snow-sweet-potato.svg")
+    .getContentAsString(Charset.defaultCharset())
+
 val hamsterSpringSvg: String = ClassPathResource("persona/animal/hamster-spring.svg")
     .getContentAsString(Charset.defaultCharset())
 
@@ -308,6 +323,9 @@ val hamsterJsSvg: String = ClassPathResource("persona/animal/hamster-js.svg")
 val hamsterCollaboratorSvg: String = ClassPathResource("persona/animal/hamster-collaborator.svg")
     .getContentAsString(Charset.defaultCharset())
 
+val hamsterTubeSvg: String = ClassPathResource("persona/animal/hamster-tube.svg")
+    .getContentAsString(Charset.defaultCharset())
+
 val snowmanSvg: String = ClassPathResource("persona/animal/snowman.svg")
     .getContentAsString(Charset.defaultCharset())
 
@@ -315,6 +333,9 @@ val snowmanMeltSvg: String = ClassPathResource("persona/animal/snowman-melt.svg"
     .getContentAsString(Charset.defaultCharset())
 
 val littleChickSantaSvg: String = ClassPathResource("persona/animal/little-chick-santa.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickTubeSvg: String = ClassPathResource("persona/animal/little-chick-tube.svg")
     .getContentAsString(Charset.defaultCharset())
 
 val hamsterSantaSvg: String = ClassPathResource("persona/animal/hamster-santa.svg")
@@ -345,6 +366,135 @@ val shibaSvg: String = ClassPathResource("persona/animal/shiba.svg")
     .getContentAsString(Charset.defaultCharset())
 
 val shibaKingSvg: String = ClassPathResource("persona/animal/shiba-king.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraSvg: String = ClassPathResource("persona/animal/capybara.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotSvg: String = ClassPathResource("persona/animal/capybara-carrot.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraSwimSvg: String = ClassPathResource("persona/animal/capybara-swim.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickEggOnHatSvg: String = ClassPathResource("persona/animal/evolution/little-chick-egg-on-hat.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickAngelSvg: String = ClassPathResource("persona/animal/evolution/little-chick-angel.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val flamingoWhiteSvg: String = ClassPathResource("persona/animal/evolution/flamingo-white.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val slimeAngelSvg: String = ClassPathResource("persona/animal/evolution/slime-angel.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val catWindowSvg: String = ClassPathResource("persona/animal/evolution/cat-window.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val gooseRobotSvg: String = ClassPathResource("persona/animal/evolution/goose-robot.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val pigRobotSvg: String = ClassPathResource("persona/animal/evolution/pig-robot.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rudolphSvg: String = ClassPathResource("persona/animal/rudolph.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxErrorEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/error.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxHappyEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/happy.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxIdleFollowEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/idle-follow.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxNotificationEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/notification.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxThinkingEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/thinking.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxTypingEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/typing.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxMiniIdleEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/mini-idle.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val dessertFoxMiniSleepEmotionSvg: String = ClassPathResource("persona/animal/emotion/fox/mini-sleep.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotErrorEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/error.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotHappyEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/happy.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotIdleFollowEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/idle-follow.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotNotificationEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/notification.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotThinkingEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/thinking.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotTypingEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/typing.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotMiniIdleEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/mini-idle.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val capybaraCarrotMiniSleepEmotionSvg: String = ClassPathResource("persona/animal/emotion/capybara-carrot/mini-sleep.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickErrorEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/error.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickHappyEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/happy.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickIdleFollowEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/idle-follow.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickNotificationEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/notification.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickThinkingEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/thinking.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickTypingEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/typing.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickMiniIdleEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/mini-idle.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val littleChickMiniSleepEmotionSvg: String = ClassPathResource("persona/animal/emotion/little-chick/mini-sleep.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitErrorEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/error.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitHappyEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/happy.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitIdleFollowEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/idle-follow.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitNotificationEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/notification.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitThinkingEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/thinking.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitTypingEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/typing.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitMiniIdleEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/mini-idle.svg")
+    .getContentAsString(Charset.defaultCharset())
+
+val rabbitMiniSleepEmotionSvg: String = ClassPathResource("persona/animal/emotion/rabbit/mini-sleep.svg")
     .getContentAsString(Charset.defaultCharset())
 
 val largeTextSvgs = lazy {

@@ -2,6 +2,7 @@ package org.gitanimals.render.infra
 
 import org.gitanimals.core.IdGenerator
 import org.gitanimals.core.filter.MDCFilter.Companion.TRACE_ID
+import org.gitanimals.core.ratelimit.RateLimitable
 import org.gitanimals.render.app.ContributionApi
 import org.gitanimals.render.app.IdentityApi
 import org.gitanimals.render.domain.UserService
@@ -10,7 +11,9 @@ import org.rooftop.netx.api.*
 import org.rooftop.netx.meta.SagaHandler
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.event.EventListener
+import org.springframework.dao.CannotAcquireLockException
 import org.springframework.scheduling.annotation.Async
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -20,6 +23,7 @@ class VisitedEventListener(
     private val userService: UserService,
     private val contributionApi: ContributionApi,
     private val identityApi: IdentityApi,
+    @Qualifier("inmemoryGithubRateLimiter") private val rateLimiter: RateLimitable,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.simpleName)
@@ -32,10 +36,12 @@ class VisitedEventListener(
             val username = visited.username
             userService.increaseVisit(username)
 
-            logger.info("Increase visit to user. username: \"$username\"")
+            logger.info("[VisitedEventListener] Increase visit to user. username: \"$username\"")
 
-            if (!userService.isContributionUpdatedBeforeOneHour(username)) {
-                return
+            rateLimiter.findRateLimit()?.let { rateLimit ->
+                if (rateLimit.getRemainPercentage() <= 50.0 && userService.isContributionUpdatedLongAgo(username).not()) {
+                    return
+                }
             }
 
             val currentYear = ZonedDateTime.now(ZoneId.of("UTC")).year
@@ -49,12 +55,12 @@ class VisitedEventListener(
                 point = increaseContributionCount * 100,
                 idempotencyKey = IdGenerator.generate().toString(),
             )
-            logger.info("Increase point to user. username: \"$username\", point:\"${increaseContributionCount * 100}\"")
+            logger.info("[VisitedEventListener] Increase point to user. username: \"$username\", point:\"${increaseContributionCount * 100}\"")
         }.onFailure {
-            if (it !is IllegalArgumentException) {
-                logger.error(
-                    "Cannot increase visit or point to user. username: \"${visited.username}\"", it
-                )
+            when (it) {
+                is CannotAcquireLockException -> logger.warn("[VisitedEventListener] Deadlock found.", it)
+                is IllegalArgumentException -> {} // DO NOTHING
+                else -> logger.error("[VisitedEventListener] Cannot increase visit or point to user. username: \"${visited.username}\"", it)
             }
         }.also {
             MDC.remove(TRACE_ID)

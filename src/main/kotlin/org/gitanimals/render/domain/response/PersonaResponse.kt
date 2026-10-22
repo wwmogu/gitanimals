@@ -1,5 +1,6 @@
 package org.gitanimals.render.domain.response
 
+import org.gitanimals.core.PersonaGrade
 import org.gitanimals.render.domain.Persona
 import org.gitanimals.core.PersonaType
 
@@ -8,16 +9,22 @@ data class PersonaResponse(
     val type: PersonaType,
     val level: String,
     val visible: Boolean,
+    val appVisible: Boolean,
     val dropRate: String,
+    val grade: PersonaGrade,
+    val isEvolutionable: Boolean,
 ) {
     companion object {
         fun from(persona: Persona): PersonaResponse {
             return PersonaResponse(
-                persona.id.toString(),
-                persona.type,
-                persona.level.value.toString(),
-                persona.visible,
-                persona.type.getDropRate()
+                id = persona.id.toString(),
+                type = persona.getType(),
+                level = persona.level.value.toString(),
+                visible = persona.visible,
+                appVisible = persona.appVisible,
+                dropRate = persona.getType().getDropRate(),
+                grade = persona.getType().grade,
+                isEvolutionable = persona.isEvolutionable(),
             )
         }
     }

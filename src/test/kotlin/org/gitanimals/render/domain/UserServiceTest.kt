@@ -1,10 +1,14 @@
 package org.gitanimals.render.domain
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.annotation.DisplayName
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.gitanimals.core.DomainEventPublisher
+import org.gitanimals.core.IdGenerator
+import org.gitanimals.core.PersonaType
 import org.gitanimals.render.supports.IntegrationTest
 
 @IntegrationTest(
@@ -19,16 +23,13 @@ internal class UserServiceTest(
     private val userRepository: UserRepository,
 ) : DescribeSpec({
 
-    beforeEach {
-        userRepository.save(user)
-    }
-
     afterEach {
         userRepository.deleteAll()
     }
 
     describe("deletePersona 메소드는") {
         context("userId와 personaId를 받으면,") {
+            userRepository.save(user)
             val personaId = user.personas[0].id
 
             it("persona를 삭제한다.") {
@@ -42,26 +43,71 @@ internal class UserServiceTest(
         }
     }
 
-    describe("createNewUser 메소드는") {
-        context("name은 다르지만 entryPoint와 authenticationId에 해당하는 User가 이미 존재한다면,") {
-            val id = 12345
-            val name = "hello"
-            val user = user(
-                id = 12345,
-                name = name,
-                authInfo = UserAuthInfo(EntryPoint.GITHUB, id.toString()),
+    describe("evolutionPersona 메소드는") {
+        context("name과 진화 타입이 nothing이 아닌 펫의 personaId를 받으면,") {
+            val user = userRepository.save(user)
+            val personaId = IdGenerator.generate()
+            userService.addPersona(
+                name = user.getName(),
+                id = personaId,
+                idempotencyKey = IdGenerator.generate().toString(),
+                personaType = PersonaType.LITTLE_CHICK.name,
+                level = 100,
             )
 
-            userRepository.saveAndFlush(user)
+            it("진화를 성공한다.") {
+                shouldNotThrowAny {
+                    userService.evolutionPersona(
+                        name = user.getName(),
+                        personaId = personaId,
+                    )
+                }
+            }
+        }
 
-            it("기존 user의 name을 새로운 유저의 name으로 변경한다.") {
-                val response = userService.createNewUser(
-                    name = "world",
-                    contributions = emptyMap(),
-                )
+        context("name과 진화 타입이 nothing인 펫의 personaId를 받으면,") {
+            val user = userRepository.save(user)
+            val personaId = IdGenerator.generate()
+            userService.addPersona(
+                name = user.getName(),
+                id = personaId,
+                idempotencyKey = IdGenerator.generate().toString(),
+                personaType = PersonaType.TEN_MM.name,
+                level = 100,
+            )
 
-                response.getName() shouldBe "world"
-                response.id shouldBe id
+            it("진화를 실패한다.") {
+                val result = shouldThrowExactly<IllegalArgumentException> {
+                    userService.evolutionPersona(
+                        name = user.getName(),
+                        personaId = personaId,
+                    )
+                }
+
+                result.message!!.contains("Evolution fail cause, not support evolution type") shouldBe true
+            }
+        }
+
+        context("name과, 진화타입이 nothing이 아니지만, 레벨이 부족한 펫의 personaId를 받으면,") {
+            val user = userRepository.save(user)
+            val personaId = IdGenerator.generate()
+            userService.addPersona(
+                name = user.getName(),
+                id = personaId,
+                idempotencyKey = IdGenerator.generate().toString(),
+                personaType = PersonaType.LITTLE_CHICK.name,
+                level = 99,
+            )
+
+            it("진화를 실패한다.") {
+                val result = shouldThrowExactly<IllegalArgumentException> {
+                    userService.evolutionPersona(
+                        name = user.getName(),
+                        personaId = personaId,
+                    )
+                }
+
+                result.message!!.contains("Cannot evolution persona cause") shouldBe true
             }
         }
     }

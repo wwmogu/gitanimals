@@ -1,12 +1,13 @@
 package org.gitanimals.render.controller
 
-import org.gitanimals.core.PersonaType
 import org.gitanimals.core.AuthorizationException
-import org.gitanimals.render.app.UserFacade
-import org.gitanimals.render.app.request.MergePersonaRequest
 import org.gitanimals.core.ErrorResponse
+import org.gitanimals.core.PersonaType
 import org.gitanimals.core.auth.RequiredUserEntryPoints
 import org.gitanimals.core.auth.UserEntryPoint
+import org.gitanimals.render.app.UserFacade
+import org.gitanimals.render.app.request.MergePersonaRequest
+import org.gitanimals.render.app.request.MergePersonaV2Request
 import org.gitanimals.render.controller.response.PersonaEnumResponse
 import org.gitanimals.render.controller.response.PersonaResponse
 import org.gitanimals.render.controller.response.UserResponse
@@ -23,8 +24,14 @@ class PersonaController(
 ) {
 
     @GetMapping("/users/{username}")
-    fun getUserByName(@PathVariable("username") username: String): UserResponse {
-        return UserResponse.from(userService.getUserByNameWithAllContributions(username))
+    fun getUserByName(
+        @PathVariable("username") username: String,
+        @RequestParam("filter-animation", defaultValue = "false") filterAnimation: Boolean,
+    ): UserResponse {
+        return UserResponse.of(
+            user = userService.getUserByNameWithAllContributions(username),
+            filterAnimation = filterAnimation,
+        )
     }
 
     @GetMapping("/personas/{persona-id}")
@@ -35,13 +42,7 @@ class PersonaController(
     ): PersonaResponse {
         val persona = userFacade.getPersona(token, personaId)
 
-        return PersonaResponse(
-            persona.id,
-            persona.type,
-            persona.level,
-            persona.visible,
-            persona.dropRate
-        )
+        return PersonaResponse.from(persona)
     }
 
     @PatchMapping("/personas")
@@ -53,13 +54,7 @@ class PersonaController(
     ): PersonaResponse {
         val changedPersona = userFacade.changePersona(token, personaChangeRequest)
 
-        return PersonaResponse(
-            changedPersona.id,
-            changedPersona.type,
-            changedPersona.level,
-            changedPersona.visible,
-            changedPersona.dropRate,
-        )
+        return PersonaResponse.from(changedPersona)
     }
 
     @GetMapping("/personas/infos")
@@ -81,6 +76,14 @@ class PersonaController(
         @RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
         @RequestBody meregPersonaRequest: MergePersonaRequest,
     ) = userFacade.mergePersona(token, meregPersonaRequest)
+
+    @PutMapping(path = ["/personas/merges"], headers = ["Api-Version=2"])
+    @ResponseStatus(HttpStatus.OK)
+    @RequiredUserEntryPoints([UserEntryPoint.GITHUB])
+    fun mergePersonaV2(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+        @RequestBody mergePersonaRequest: MergePersonaV2Request,
+    ) = userFacade.mergePersonaV2(token, mergePersonaRequest)
 
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

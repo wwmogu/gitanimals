@@ -12,6 +12,7 @@ import org.gitanimals.render.controller.request.UsernameAndPersonaIdRequest
 import org.gitanimals.render.controller.response.PersonaResponse
 import org.gitanimals.render.controller.response.UserResponse
 import org.gitanimals.render.domain.UserService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -21,6 +22,8 @@ class InternalPersonaController(
     private val userFacade: UserFacade,
     private val userService: UserService,
 ) {
+
+    private val logger = LoggerFactory.getLogger(this::class.simpleName)
 
     @PostMapping("/internals/personas")
     @RequiredUserEntryPoints([UserEntryPoint.GITHUB])
@@ -37,13 +40,7 @@ class InternalPersonaController(
             addPersonaRequest.level,
         )
 
-        return PersonaResponse(
-            persona.id,
-            persona.type,
-            persona.level,
-            persona.visible,
-            persona.dropRate,
-        )
+        return PersonaResponse.from(persona)
     }
 
     @PostMapping("/internals/personas/multiply")
@@ -61,13 +58,7 @@ class InternalPersonaController(
                 0,
             )
 
-            PersonaResponse(
-                persona.id,
-                persona.type,
-                persona.level,
-                persona.visible,
-                persona.dropRate,
-            )
+            PersonaResponse.from(persona)
         }
     }
 
@@ -79,13 +70,7 @@ class InternalPersonaController(
     ): PersonaResponse {
         val persona = userFacade.deletePersona(token, personaId)
 
-        return PersonaResponse(
-            persona.id,
-            persona.type,
-            persona.level,
-            persona.visible,
-            persona.dropRate,
-        )
+        return PersonaResponse.from(persona)
     }
 
     @GetMapping("/internals/personas/all")
@@ -93,13 +78,27 @@ class InternalPersonaController(
     fun getAllPersonasByUserIdsAndPersonaIds(
         @RequestBody usernameAndPersonaIdRequests: List<UsernameAndPersonaIdRequest>
     ): List<UserResponse> {
+        val usernameAndPersonaIdRequestSet = usernameAndPersonaIdRequests.toSet()
+
         val users = userService.findAllUsersByNameWithContributions(
-            usernameAndPersonaIdRequests.map { it.username }.toSet()
+            usernameAndPersonaIdRequestSet.mapTo(mutableSetOf()) { it.username }
         )
 
+        require(users.size == usernameAndPersonaIdRequestSet.size) {
+            val message = "Failed to retrieve all users from the request."
+            val retrievedUsers = users.map { it.getName() }
+            val failedRetrieveUsers = usernameAndPersonaIdRequestSet.filter { request ->
+                request.username !in retrievedUsers
+            }
+            logger.error("$message request: \"$usernameAndPersonaIdRequestSet\", failed retrieved users: \"$failedRetrieveUsers\"")
+            message
+        }
+
         return users.map { user ->
-            val personaId =
-                usernameAndPersonaIdRequests.first { it.username == user.getName() }.personaId
+            val personaId = usernameAndPersonaIdRequestSet.firstOrNull {
+                it.username.lowercase() == user.getName().lowercase()
+            }?.personaId ?: error("${user.getName()} 에 매칭되는 user를 찾을 수 없습니다. usernameAndPersonaIdRequestSet: $usernameAndPersonaIdRequestSet")
+
             UserResponse.fromWithSpecificPersona(user, listOf(personaId))
         }
     }

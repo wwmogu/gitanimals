@@ -7,13 +7,14 @@ import io.kotest.core.annotation.DisplayName
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
-import org.gitanimals.core.DomainEventPublisher
-import org.gitanimals.core.PersonaType
-import org.gitanimals.core.instant
-import org.gitanimals.core.toZonedDateTime
+import io.kotest.matchers.shouldBe
+import org.gitanimals.core.*
+import org.gitanimals.core.filter.MDCFilter.Companion.TRACE_ID
 import org.gitanimals.render.domain.event.PersonaDeleted
+import org.gitanimals.render.domain.request.VisibleChangeType
 import org.gitanimals.render.domain.value.Contribution
 import org.gitanimals.render.supports.DomainEventHolder
+import org.slf4j.MDC
 import org.springframework.test.context.ContextConfiguration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -35,6 +36,7 @@ internal class UserTest(
 ) : DescribeSpec({
 
     beforeEach {
+        MDC.put(TRACE_ID, IdGenerator.generate().toString())
         domainEventHolder.deleteAll()
     }
 
@@ -72,14 +74,14 @@ internal class UserTest(
             )
 
             it("true를 반환한다.") {
-                user.isContributionUpdatedBeforeOneHour() shouldBeEqual true
+                user.isContributionUpdatedLongAgo() shouldBeEqual true
             }
         }
 
         context("user의 현재년도에 해당하는 contribution을 찾을 수 없는 경우,") {
             val user = user()
             it("true를 반환한다.") {
-                user.isContributionUpdatedBeforeOneHour() shouldBeEqual true
+                user.isContributionUpdatedLongAgo() shouldBeEqual true
             }
         }
 
@@ -94,7 +96,7 @@ internal class UserTest(
                 )
             )
             it("false를 반환한다.") {
-                user.isContributionUpdatedBeforeOneHour() shouldBeEqual false
+                user.isContributionUpdatedLongAgo() shouldBeEqual false
             }
         }
     }
@@ -122,7 +124,7 @@ internal class UserTest(
             it("새로운 펫을 지급한다.") {
                 user.giveNewPersonaByType(persona)
 
-                user.personas.find { it.type == PersonaType.PENGUIN }.shouldNotBeNull()
+                user.personas.find { it.getType() == PersonaType.PENGUIN }.shouldNotBeNull()
             }
         }
     }
@@ -164,6 +166,32 @@ internal class UserTest(
                 shouldThrowExactly<IllegalStateException> {
                     user.deletePersona(personaId)
                 }
+            }
+        }
+    }
+
+    describe("changePersonaVisible 메소드는") {
+        context("visibleChangeType이 APP일때,") {
+            val user = user().apply {
+                this.personas.add(persona(id = 1, user = this))
+            }
+
+            it("personaId에 해당하는 persona의 appVisible을 visible로 변경한다") {
+                user.changePersonaVisible(1, true, VisibleChangeType.APP)
+
+                user.personas.first().appVisible shouldBe true
+            }
+        }
+
+        context("visibleChangeType이 DEFAULT일때,") {
+            val user = user().apply {
+                this.personas.add(persona(id = 1, user = this))
+            }
+
+            it("personaId에 해당하는 persona의 visible을 visible로 변경한다") {
+                user.changePersonaVisible(1, true, VisibleChangeType.DEFAULT)
+
+                user.personas.first().visible shouldBe true
             }
         }
     }

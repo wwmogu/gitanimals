@@ -1,7 +1,6 @@
 package org.gitanimals.rank.app
 
 import org.gitanimals.core.IdGenerator
-import org.gitanimals.core.filter.MDCFilter.Companion.TRACE_ID
 import org.gitanimals.rank.domain.RankQueryRepository
 import org.gitanimals.rank.domain.RankQueryRepository.RankType.WEEKLY_USER_CONTRIBUTIONS
 import org.gitanimals.rank.domain.UserContributionRankService
@@ -9,7 +8,6 @@ import org.gitanimals.rank.domain.history.RankHistoryService
 import org.gitanimals.rank.domain.history.request.InitRankHistoryRequest
 import org.gitanimals.rank.domain.response.RankResponse
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -26,7 +24,6 @@ class GivePointToUsersFacade(
     @Scheduled(cron = "0 0 23 * * SUN")
     fun givePointToUsers() {
         runCatching {
-            MDC.put(TRACE_ID, IdGenerator.generate().toString())
             val userRankWithIds = rankQueryRepository.findAllRank(
                 rankStartedAt = 0,
                 limit = 2,
@@ -55,15 +52,15 @@ class GivePointToUsersFacade(
                         rank = it.rank,
                         prize = getPoint(it),
                         rankType = RankQueryRepository.RankType.WEEKLY_USER_CONTRIBUTIONS,
-                        winnerId  = it.id.toLong(),
+                        winnerId = it.id.toLong(),
                         winnerName = it.name,
                     )
                 }
             )
             userContributionRankService.initialWeeklyRanks()
             rankQueryRepository.initialRank(WEEKLY_USER_CONTRIBUTIONS)
-        }.also {
-            MDC.remove(TRACE_ID)
+        }.onFailure {
+            logger.info("[GivePointToUsersFacade] Fail to awarded point. ${it.message}", it)
         }
     }
 
